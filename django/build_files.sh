@@ -1,4 +1,2 @@
-cat > build_files.sh << 'EOF'
-pip install -r requirements-vercel.txt
-python manage.py collectstatic --noinput
-EOF
+pip install -r requirements.txt
+python manage.py collectstatic --noinput --clear
