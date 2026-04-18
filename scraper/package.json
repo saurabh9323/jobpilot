@@ -1,0 +1,24 @@
+{
+  "name": "jobpilot-scraper",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "scrape": "ts-node src/index.ts",
+    "scrape:linkedin": "ts-node src/index.ts --portals=linkedin",
+    "scrape:naukri":   "ts-node src/index.ts --portals=naukri",
+    "scrape:all":      "ts-node src/index.ts --portals=all",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "playwright-extra": "^4.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2",
+    "playwright": "^1.43.1",
+    "axios": "^1.6.8",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.8",
+    "typescript": "^5.4.5",
+    "ts-node": "^10.9.2"
+  }
+}

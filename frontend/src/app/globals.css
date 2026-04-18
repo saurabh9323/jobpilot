@@ -1,0 +1,71 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 252 93% 93%;
+    --accent-foreground: 252 57% 37%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 252 75% 65%;
+    --radius: 0.625rem;
+  }
+
+  .dark {
+    --background: 240 10% 6%;
+    --foreground: 0 0% 95%;
+    --card: 240 10% 9%;
+    --card-foreground: 0 0% 95%;
+    --muted: 240 6% 14%;
+    --muted-foreground: 240 5% 55%;
+    --accent: 252 50% 18%;
+    --accent-foreground: 252 80% 80%;
+    --border: 240 6% 18%;
+    --input: 240 6% 18%;
+    --ring: 252 75% 65%;
+  }
+
+  * {
+    @apply border-border;
+    box-sizing: border-box;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { @apply bg-transparent; }
+  ::-webkit-scrollbar-thumb { @apply bg-border rounded-full; }
+  ::-webkit-scrollbar-thumb:hover { @apply bg-muted-foreground; }
+}
+
+@layer utilities {
+  .text-balance { text-wrap: balance; }
+
+  /* Funnel gradient bars */
+  .bar-discovered  { @apply bg-brand-200; }
+  .bar-scored      { @apply bg-brand-400; }
+  .bar-applied     { @apply bg-brand-500; }
+  .bar-screening   { background: #059669; }
+  .bar-interview   { background: #D97706; }
+  .bar-offer       { background: #16A34A; }
+
+  /* Status badge colours */
+  .status-discovered  { @apply bg-slate-100 text-slate-600; }
+  .status-scored      { @apply bg-brand-50 text-brand-700; }
+  .status-applied     { @apply bg-blue-50 text-blue-700; }
+  .status-screening   { @apply bg-emerald-50 text-emerald-700; }
+  .status-interview   { @apply bg-amber-50 text-amber-700; }
+  .status-offer       { @apply bg-green-50 text-green-700; }
+  .status-rejected    { @apply bg-red-50 text-red-600; }
+}

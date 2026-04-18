@@ -1,0 +1,237 @@
+version: "3.9"
+
+# ─────────────────────────────────────────────
+#  JobPilot AI — Docker Compose (Week 1 stack)
+# ─────────────────────────────────────────────
+#  Services:
+#    frontend   → Next.js 14 (port 3000)
+#    gateway    → Express API gateway (port 4000)
+#    django     → Django REST + AI/ML (port 8000)
+#    worker     → Celery async worker
+#    beat       → Celery periodic scheduler
+#    postgres   → PostgreSQL 16 + pgvector
+#    redis      → Redis 7 (queue + cache)
+#    elastic    → Elasticsearch 8 (jobs index)
+#    nginx      → Reverse proxy (port 80)
+# ─────────────────────────────────────────────
+
+x-django-env: &django-env
+  DATABASE_URL: postgres://jobpilot:jobpilot@postgres:5432/jobpilot
+  REDIS_URL: redis://redis:6379/0
+  ELASTICSEARCH_URL: http://elastic:9200
+  SECRET_KEY: ${DJANGO_SECRET_KEY:-dev-secret-change-in-prod}
+  DEBUG: ${DEBUG:-true}
+  ALLOWED_HOSTS: "*"
+  OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+  ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+  APOLLO_API_KEY: ${APOLLO_API_KEY:-}
+  HUNTER_API_KEY: ${HUNTER_API_KEY:-}
+
+services:
+  # ── Frontend ────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: jp_frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_GATEWAY_URL: http://localhost:4000
+      NEXT_PUBLIC_DJANGO_URL: http://localhost:8000
+      NEXT_PUBLIC_WS_URL: ws://localhost:4000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      - gateway
+    networks:
+      - jp_net
+
+  # ── Express API Gateway ──────────────────────
+  gateway:
+    build:
+      context: ./gateway
+      dockerfile: Dockerfile
+    container_name: jp_gateway
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    environment:
+      PORT: 4000
+      DATABASE_URL: postgres://jobpilot:jobpilot@postgres:5432/jobpilot
+      REDIS_URL: redis://redis:6379/0
+      DJANGO_URL: http://django:8000
+      JWT_SECRET: ${JWT_SECRET:-dev-jwt-secret}
+      SENDGRID_API_KEY: ${SENDGRID_API_KEY:-}
+      SLACK_BOT_TOKEN: ${SLACK_BOT_TOKEN:-}
+    volumes:
+      - ./gateway:/app
+      - /app/node_modules
+      - ./scraper:/scraper          # shared scraper module
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - jp_net
+
+  # ── Django AI/ML Backend ─────────────────────
+  django:
+    build:
+      context: ./django
+      dockerfile: Dockerfile
+    container_name: jp_django
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      <<: *django-env
+    volumes:
+      - ./django:/app
+      - django_media:/app/media
+    command: >
+      sh -c "python manage.py wait_for_db &&
+             python manage.py migrate &&
+             python manage.py collectstatic --noinput &&
+             gunicorn jobpilot.wsgi:application --bind 0.0.0.0:8000 --workers 4 --timeout 120"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - jp_net
+
+  # ── Celery Async Worker ──────────────────────
+  worker:
+    build:
+      context: ./django
+      dockerfile: Dockerfile
+    container_name: jp_worker
+    restart: unless-stopped
+    environment:
+      <<: *django-env
+    volumes:
+      - ./django:/app
+    command: >
+      celery -A jobpilot worker
+        --loglevel=info
+        --queues=scraping,email_outreach,ai_scoring,notifications
+        --concurrency=4
+    depends_on:
+      - django
+      - redis
+    networks:
+      - jp_net
+
+  # ── Celery Beat Scheduler ────────────────────
+  beat:
+    build:
+      context: ./django
+      dockerfile: Dockerfile
+    container_name: jp_beat
+    restart: unless-stopped
+    environment:
+      <<: *django-env
+    volumes:
+      - ./django:/app
+    command: celery -A jobpilot beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    depends_on:
+      - django
+      - redis
+    networks:
+      - jp_net
+
+  # ── PostgreSQL 16 + pgvector ─────────────────
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: jp_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: jobpilot
+      POSTGRES_USER: jobpilot
+      POSTGRES_PASSWORD: jobpilot
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./infra/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U jobpilot"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - jp_net
+
+  # ── Redis 7 ──────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: jp_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - jp_net
+
+  # ── Elasticsearch 8 ──────────────────────────
+  elastic:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.0
+    container_name: jp_elastic
+    restart: unless-stopped
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+    volumes:
+      - elastic_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:9200/_cluster/health | grep -q '\"status\":\"green\"\\|\"status\":\"yellow\"'"]
+      interval: 15s
+      timeout: 10s
+      retries: 20
+    networks:
+      - jp_net
+
+  # ── Nginx Reverse Proxy ───────────────────────
+  nginx:
+    image: nginx:alpine
+    container_name: jp_nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - django_media:/media:ro
+    depends_on:
+      - frontend
+      - gateway
+      - django
+    networks:
+      - jp_net
+
+# ── Named volumes ──────────────────────────────
+volumes:
+  postgres_data:
+  redis_data:
+  elastic_data:
+  django_media:
+
+# ── Network ────────────────────────────────────
+networks:
+  jp_net:
+    driver: bridge
