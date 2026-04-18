@@ -1,4 +1,3 @@
-cat > requirements-vercel.txt << 'EOF'
 Django==4.2.13
 djangorestframework==3.15.1
 django-cors-headers==4.3.1
@@ -17,4 +16,3 @@ python-dotenv==1.0.1
 gunicorn==22.0.0
 whitenoise==6.6.0
 sendgrid==6.11.0
-EOF
