@@ -7,7 +7,7 @@ import { RecentActivityCard } from "@/components/dashboard/recent-activity-card"
 
 export default function DashboardPage() {
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
+    <div className="flex h-screen overflow-hidden bg-white">
       <Sidebar />
 
       <div className="flex flex-col flex-1 overflow-hidden">
@@ -19,7 +19,7 @@ export default function DashboardPage() {
             {/* Page header */}
             <div>
               <h1 className="text-xl font-medium tracking-tight">Dashboard</h1>
-              <p className="text-sm text-muted-foreground font-mono mt-0.5">
+              <p className="text-sm text-gray-500 font-mono mt-0.5">
                 autonomous job hunt · live feed
               </p>
             </div>

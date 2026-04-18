@@ -23,7 +23,7 @@ export function TopBar() {
   }
 
   return (
-    <header className="h-14 border-b border-border flex items-center px-6 gap-4 shrink-0 bg-card/50 backdrop-blur-sm">
+    <header className="h-14 border-b border-gray-200 flex items-center px-6 gap-4 shrink-0 bg-white/50 backdrop-blur-sm">
       {/* Engine toggle */}
       <button
         onClick={() => setEngineRunning((v) => !v)}
@@ -31,7 +31,7 @@ export function TopBar() {
           "flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-medium border transition-all",
           engineRunning
             ? "bg-brand-500 border-brand-600 text-white"
-            : "bg-background border-border text-muted-foreground hover:border-brand-400 hover:text-brand-600",
+            : "bg-white border-gray-200 text-gray-500 hover:border-brand-400 hover:text-brand-600",
         )}
       >
         {engineRunning ? (
@@ -54,7 +54,7 @@ export function TopBar() {
         disabled={scraping}
         className={clsx(
           "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs border transition-all",
-          "text-muted-foreground border-border hover:border-border/80 hover:text-foreground",
+          "text-gray-500 border-gray-200 hover:border-gray-200/80 hover:text-gray-900",
           scraping && "opacity-50 cursor-not-allowed",
         )}
       >
@@ -66,7 +66,7 @@ export function TopBar() {
       <div className="flex-1" />
 
       {/* Quick stats pill */}
-      <div className="flex items-center gap-4 text-xs font-mono text-muted-foreground">
+      <div className="flex items-center gap-4 text-xs font-mono text-gray-500">
         <span>2,840 discovered</span>
         <span className="text-border">·</span>
         <span>127 applied</span>

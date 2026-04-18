@@ -32,7 +32,7 @@ function FunnelBar({
       >
         <span className="text-xs font-medium text-white truncate">{label}</span>
       </div>
-      <span className="text-sm font-mono text-muted-foreground tabular-nums">
+      <span className="text-sm font-mono text-gray-500 tabular-nums">
         {count.toLocaleString()}
       </span>
     </div>
@@ -49,10 +49,10 @@ export function FunnelCard() {
   const total = data?.discovered ?? 1;
 
   return (
-    <div className="border border-border rounded-xl p-5 bg-card">
+    <div className="border border-gray-200 rounded-xl p-5 bg-white">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <p className="text-[10px] font-mono font-medium uppercase tracking-widest text-muted-foreground">
+          <p className="text-[10px] font-mono font-medium uppercase tracking-widest text-gray-500">
             Application Funnel
           </p>
           <h3 className="text-sm font-medium mt-0.5">Full pipeline overview</h3>
@@ -60,7 +60,7 @@ export function FunnelCard() {
         {data && (
           <div className="text-right">
             <p className="text-xl font-medium tabular-nums">{data.offer ?? 0}</p>
-            <p className="text-xs text-muted-foreground">offers</p>
+            <p className="text-xs text-gray-500">offers</p>
           </div>
         )}
       </div>
@@ -68,7 +68,7 @@ export function FunnelCard() {
       {isLoading ? (
         <div className="space-y-2 animate-pulse">
           {[100, 85, 60, 35, 20, 8].map((w, i) => (
-            <div key={i} className="h-7 rounded bg-muted" style={{ width: `${w}%` }} />
+            <div key={i} className="h-7 rounded bg-gray-100" style={{ width: `${w}%` }} />
           ))}
         </div>
       ) : (
@@ -92,7 +92,7 @@ export function FunnelCard() {
       )}
 
       {data && (
-        <p className="text-xs text-muted-foreground font-mono mt-4">
+        <p className="text-xs text-gray-500 font-mono mt-4">
           conversion: {((data.offer / Math.max(data.applied, 1)) * 100).toFixed(1)}% offer rate
         </p>
       )}

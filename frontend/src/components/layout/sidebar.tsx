@@ -29,16 +29,16 @@ export function Sidebar() {
   const { connected } = useSocket();
 
   return (
-    <aside className="w-56 border-r border-border flex flex-col shrink-0 bg-card">
+    <aside className="w-56 border-r border-gray-200 flex flex-col shrink-0 bg-white">
       {/* Logo */}
-      <div className="px-5 py-4 border-b border-border">
+      <div className="px-5 py-4 border-b border-gray-200">
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-lg bg-brand-500 flex items-center justify-center">
             <Zap size={14} className="text-white" />
           </div>
           <span className="font-semibold text-[15px] tracking-tight">JobPilot AI</span>
         </div>
-        <p className="text-[10px] font-mono text-muted-foreground mt-1">v1.0 · week 1</p>
+        <p className="text-[10px] font-mono text-gray-500 mt-1">v1.0 · week 1</p>
       </div>
 
       {/* Nav */}
@@ -53,7 +53,7 @@ export function Sidebar() {
                 "flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors",
                 active
                   ? "bg-brand-50 text-brand-700 font-medium"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted",
+                  : "text-gray-500 hover:text-gray-900 hover:bg-gray-100",
               )}
             >
               <Icon size={15} />
@@ -65,15 +65,15 @@ export function Sidebar() {
       </nav>
 
       {/* Engine status footer */}
-      <div className="px-4 py-3 border-t border-border">
+      <div className="px-4 py-3 border-t border-gray-200">
         <div className="flex items-center gap-2">
           <span
             className={clsx(
               "w-2 h-2 rounded-full",
-              connected ? "bg-green-500 animate-pulse" : "bg-muted-foreground",
+              connected ? "bg-green-500 animate-pulse" : "bg-gray-400",
             )}
           />
-          <span className="text-[11px] font-mono text-muted-foreground">
+          <span className="text-[11px] font-mono text-gray-500">
             {connected ? "engine live" : "connecting..."}
           </span>
         </div>

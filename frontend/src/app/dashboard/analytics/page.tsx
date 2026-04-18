@@ -29,10 +29,10 @@ const WEEKLY_DATA = [
 
 function StatBox({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
   return (
-    <div className="border border-border rounded-xl p-5 bg-card">
-      <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground mb-1">{label}</p>
+    <div className="border border-gray-200 rounded-xl p-5 bg-white">
+      <p className="text-[10px] font-mono uppercase tracking-widest text-gray-500 mb-1">{label}</p>
       <p className="text-2xl font-medium tabular-nums">{value}</p>
-      {sub && <p className="text-xs text-muted-foreground mt-0.5">{sub}</p>}
+      {sub && <p className="text-xs text-gray-500 mt-0.5">{sub}</p>}
     </div>
   );
 }
@@ -67,7 +67,7 @@ export default function AnalyticsPage() {
           <div className="max-w-7xl mx-auto space-y-6">
             <div>
               <h1 className="text-xl font-medium tracking-tight">Analytics</h1>
-              <p className="text-sm text-muted-foreground font-mono mt-0.5">full funnel performance</p>
+              <p className="text-sm text-gray-500 font-mono mt-0.5">full funnel performance</p>
             </div>
 
             {/* KPI row */}
@@ -81,8 +81,8 @@ export default function AnalyticsPage() {
             {/* Charts row */}
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
               {/* Weekly applications bar chart */}
-              <div className="border border-border rounded-xl p-5 bg-card">
-                <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground mb-1">
+              <div className="border border-gray-200 rounded-xl p-5 bg-white">
+                <p className="text-[10px] font-mono uppercase tracking-widest text-gray-500 mb-1">
                   Weekly Activity
                 </p>
                 <h3 className="text-sm font-medium mb-4">Applications + responses per week</h3>
@@ -100,8 +100,8 @@ export default function AnalyticsPage() {
               </div>
 
               {/* Portal breakdown pie chart */}
-              <div className="border border-border rounded-xl p-5 bg-card">
-                <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground mb-1">
+              <div className="border border-gray-200 rounded-xl p-5 bg-white">
+                <p className="text-[10px] font-mono uppercase tracking-widest text-gray-500 mb-1">
                   Portal Breakdown
                 </p>
                 <h3 className="text-sm font-medium mb-4">Jobs discovered by source</h3>
@@ -141,15 +141,15 @@ export default function AnalyticsPage() {
             </div>
 
             {/* Funnel conversion table */}
-            <div className="border border-border rounded-xl p-5 bg-card">
-              <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground mb-1">
+            <div className="border border-gray-200 rounded-xl p-5 bg-white">
+              <p className="text-[10px] font-mono uppercase tracking-widest text-gray-500 mb-1">
                 Conversion Table
               </p>
               <h3 className="text-sm font-medium mb-4">Stage-by-stage drop-off</h3>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="text-left text-xs text-muted-foreground font-mono border-b border-border">
+                    <tr className="text-left text-xs text-gray-500 font-mono border-b border-gray-200">
                       <th className="pb-2 font-medium">Stage</th>
                       <th className="pb-2 font-medium tabular-nums text-right">Count</th>
                       <th className="pb-2 font-medium tabular-nums text-right">From prev</th>
@@ -173,8 +173,8 @@ export default function AnalyticsPage() {
                         <tr key={key}>
                           <td className="py-2.5">{stage}</td>
                           <td className="py-2.5 text-right tabular-nums font-mono">{count.toLocaleString()}</td>
-                          <td className="py-2.5 text-right tabular-nums font-mono text-muted-foreground">{fromPrev}%</td>
-                          <td className="py-2.5 text-right tabular-nums font-mono text-muted-foreground">{fromTotal}%</td>
+                          <td className="py-2.5 text-right tabular-nums font-mono text-gray-500">{fromPrev}%</td>
+                          <td className="py-2.5 text-right tabular-nums font-mono text-gray-500">{fromTotal}%</td>
                         </tr>
                       );
                     })}

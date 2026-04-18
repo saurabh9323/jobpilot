@@ -35,16 +35,16 @@ function Toggle({
   onChange: (v: boolean) => void;
 }) {
   return (
-    <div className="flex items-center justify-between py-3 border-b border-border last:border-0">
+    <div className="flex items-center justify-between py-3 border-b border-gray-200 last:border-0">
       <div>
         <p className="text-sm font-medium">{label}</p>
-        {sub && <p className="text-xs text-muted-foreground mt-0.5">{sub}</p>}
+        {sub && <p className="text-xs text-gray-500 mt-0.5">{sub}</p>}
       </div>
       <button
         onClick={() => onChange(!value)}
         className={clsx(
           "w-9 h-5 rounded-full relative transition-colors border",
-          value ? "bg-brand-500 border-brand-600" : "bg-muted border-border",
+          value ? "bg-brand-500 border-brand-600" : "bg-gray-100 border-gray-200",
         )}
       >
         <span
@@ -79,7 +79,7 @@ function TagInput({
 
   return (
     <div>
-      <label className="text-xs font-mono uppercase tracking-wider text-muted-foreground mb-1.5 block">
+      <label className="text-xs font-mono uppercase tracking-wider text-gray-500 mb-1.5 block">
         {label}
       </label>
       <div className="flex flex-wrap gap-1.5 mb-2">
@@ -99,11 +99,11 @@ function TagInput({
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), add())}
           placeholder={placeholder ?? "Type and press Enter"}
-          className="flex-1 text-sm px-3 py-1.5 border border-border rounded-lg bg-background focus:outline-none focus:ring-1 focus:ring-brand-400"
+          className="flex-1 text-sm px-3 py-1.5 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-1 focus:ring-brand-400"
         />
         <button
           onClick={add}
-          className="px-3 py-1.5 text-sm bg-muted hover:bg-muted/80 rounded-lg border border-border transition-colors"
+          className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-100/80 rounded-lg border border-gray-200 transition-colors"
         >
           Add
         </button>
@@ -164,7 +164,7 @@ export default function SettingsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-xl font-medium">Settings</h1>
-                <p className="text-sm text-muted-foreground font-mono mt-0.5">AI brain profile + automation</p>
+                <p className="text-sm text-gray-500 font-mono mt-0.5">AI brain profile + automation</p>
               </div>
               <button
                 onClick={() => saveMutation.mutate()}
@@ -176,30 +176,30 @@ export default function SettingsPage() {
             </div>
 
             {/* Career section */}
-            <section className="border border-border rounded-xl p-5 space-y-4 bg-card">
-              <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Career profile</p>
+            <section className="border border-gray-200 rounded-xl p-5 space-y-4 bg-white">
+              <p className="text-[10px] font-mono uppercase tracking-widest text-gray-500">Career profile</p>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs font-mono uppercase tracking-wider text-muted-foreground mb-1.5 block">
+                  <label className="text-xs font-mono uppercase tracking-wider text-gray-500 mb-1.5 block">
                     Current role
                   </label>
                   <input
                     value={merged.current_role}
                     onChange={(e) => set("current_role", e.target.value)}
-                    className="w-full text-sm px-3 py-1.5 border border-border rounded-lg bg-background focus:outline-none focus:ring-1 focus:ring-brand-400"
+                    className="w-full text-sm px-3 py-1.5 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-1 focus:ring-brand-400"
                     placeholder="e.g. Senior Backend Engineer"
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-mono uppercase tracking-wider text-muted-foreground mb-1.5 block">
+                  <label className="text-xs font-mono uppercase tracking-wider text-gray-500 mb-1.5 block">
                     Years of experience
                   </label>
                   <input
                     type="number"
                     value={merged.years_experience}
                     onChange={(e) => set("years_experience", parseInt(e.target.value))}
-                    className="w-full text-sm px-3 py-1.5 border border-border rounded-lg bg-background focus:outline-none focus:ring-1 focus:ring-brand-400"
+                    className="w-full text-sm px-3 py-1.5 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-1 focus:ring-brand-400"
                   />
                 </div>
               </div>
@@ -227,35 +227,35 @@ export default function SettingsPage() {
             </section>
 
             {/* Salary section */}
-            <section className="border border-border rounded-xl p-5 bg-card">
-              <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground mb-4">
+            <section className="border border-gray-200 rounded-xl p-5 bg-white">
+              <p className="text-[10px] font-mono uppercase tracking-widest text-gray-500 mb-4">
                 Salary range (₹ lakhs/yr)
               </p>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs text-muted-foreground mb-1 block">Floor (min)</label>
+                  <label className="text-xs text-gray-500 mb-1 block">Floor (min)</label>
                   <input
                     type="number"
                     value={merged.salary_floor}
                     onChange={(e) => set("salary_floor", parseInt(e.target.value))}
-                    className="w-full text-sm px-3 py-1.5 border border-border rounded-lg bg-background focus:outline-none focus:ring-1 focus:ring-brand-400"
+                    className="w-full text-sm px-3 py-1.5 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-1 focus:ring-brand-400"
                   />
                 </div>
                 <div>
-                  <label className="text-xs text-muted-foreground mb-1 block">Ceiling (target)</label>
+                  <label className="text-xs text-gray-500 mb-1 block">Ceiling (target)</label>
                   <input
                     type="number"
                     value={merged.salary_ceiling}
                     onChange={(e) => set("salary_ceiling", parseInt(e.target.value))}
-                    className="w-full text-sm px-3 py-1.5 border border-border rounded-lg bg-background focus:outline-none focus:ring-1 focus:ring-brand-400"
+                    className="w-full text-sm px-3 py-1.5 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-1 focus:ring-brand-400"
                   />
                 </div>
               </div>
             </section>
 
             {/* Automation toggles */}
-            <section className="border border-border rounded-xl p-5 bg-card">
-              <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground mb-2">
+            <section className="border border-gray-200 rounded-xl p-5 bg-white">
+              <p className="text-[10px] font-mono uppercase tracking-widest text-gray-500 mb-2">
                 Automation
               </p>
               <Toggle
@@ -279,8 +279,8 @@ export default function SettingsPage() {
             </section>
 
             {/* Resume text */}
-            <section className="border border-border rounded-xl p-5 bg-card">
-              <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground mb-3">
+            <section className="border border-gray-200 rounded-xl p-5 bg-white">
+              <p className="text-[10px] font-mono uppercase tracking-widest text-gray-500 mb-3">
                 Resume text (used for AI scoring)
               </p>
               <textarea
@@ -288,7 +288,7 @@ export default function SettingsPage() {
                 value={merged.resume_text}
                 onChange={(e) => set("resume_text", e.target.value)}
                 placeholder="Paste your resume text here. The AI uses this to compute match scores, generate cover letters, and identify ATS gaps."
-                className="w-full text-sm px-3 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-1 focus:ring-brand-400 font-mono resize-none"
+                className="w-full text-sm px-3 py-2 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-1 focus:ring-brand-400 font-mono resize-none"
               />
             </section>
           </div>
