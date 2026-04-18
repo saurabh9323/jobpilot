@@ -5,7 +5,15 @@ import logging
 import subprocess
 from datetime import datetime
 
-from celery import shared_task
+try:
+    from celery import shared_task
+except ImportError:
+    def shared_task(*args, **kwargs):
+        def decorator(func):
+            return func
+        if len(args) == 1 and callable(args[0]):
+            return args[0]
+        return decorator
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +50,6 @@ def scrape_portal(self, portal: str):
         if result.returncode != 0:
             raise RuntimeError(f"Scraper exited with code {result.returncode}: {result.stderr[-500:]}")
 
-        # Parse summary line from stdout: "✅ linkedin: 142 found, 38 new, 104 dupes"
         import re
         match = re.search(r"(\d+) found, (\d+) new", result.stdout)
         jobs_found = int(match.group(1)) if match else 0
@@ -63,7 +70,9 @@ def scrape_portal(self, portal: str):
         run.finished_at = datetime.now()
         run.save()
         logger.error("Scrape failed: %s — %s", portal, exc)
-        raise self.retry(exc=exc)
+        if hasattr(self, 'retry'):
+            raise self.retry(exc=exc)
+        raise exc
 
 
 @shared_task(queue="scraping", name="apps.scraper.tasks.scrape_all_portals")

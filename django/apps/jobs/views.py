@@ -9,8 +9,16 @@ from .serializers import (
     JobListSerializer, JobDetailSerializer,
     ApplicationSerializer, ScrapeRunSerializer,
 )
-from apps.scraper.tasks import scrape_portal
-from apps.ai.tasks import score_job_match
+
+try:
+    from apps.scraper.tasks import scrape_portal
+except ImportError:
+    scrape_portal = None
+
+try:
+    from apps.ai.tasks import score_job_match
+except ImportError:
+    score_job_match = None
 
 
 class JobViewSet(viewsets.ReadOnlyModelViewSet):
@@ -39,6 +47,8 @@ class JobViewSet(viewsets.ReadOnlyModelViewSet):
     @action(detail=True, methods=["post"])
     def score(self, request, pk=None):
         """Manually trigger AI match scoring for a job."""
+        if score_job_match is None:
+            return Response({"error": "Celery not available in this environment"}, status=503)
         job = self.get_object()
         task = score_job_match.delay(str(job.id))
         return Response({"task_id": task.id, "status": "queued"})
@@ -90,6 +100,8 @@ class ScrapeRunViewSet(viewsets.ReadOnlyModelViewSet):
     @action(detail=False, methods=["post"])
     def trigger(self, request):
         """Manually kick off a scrape for a specific portal."""
+        if scrape_portal is None:
+            return Response({"error": "Celery not available in this environment"}, status=503)
         portal = request.data.get("portal")
         valid = ["linkedin", "naukri", "indeed", "wellfound", "instahyre"]
         if portal not in valid:
