@@ -6,6 +6,9 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Detect if running on Vercel
+IS_VERCEL = os.environ.get("VERCEL", False)
+
 SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret-change-in-production")
 DEBUG = os.environ.get("DEBUG", "true").lower() == "true"
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "*").split(",")
@@ -25,11 +28,16 @@ THIRD_PARTY_APPS = [
     "corsheaders",
     "django_filters",
     "drf_spectacular",
-    "celery",
-    "django_celery_beat",
-    "django_celery_results",
-    "django_extensions",
 ]
+
+# Only add heavy apps when NOT on Vercel
+if not IS_VERCEL:
+    THIRD_PARTY_APPS += [
+        "celery",
+        "django_celery_beat",
+        "django_celery_results",
+        "django_extensions",
+    ]
 
 LOCAL_APPS = [
     "apps.users",
@@ -84,32 +92,40 @@ DATABASES = {
     )
 }
 
-# ── Cache & Broker — Redis ───────────────────────
+# ── Cache — Redis (local/Railway) or Memory (Vercel) ──
 REDIS_URL = os.environ.get("REDIS_URL", "redis://localhost:6379/0")
 
-CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.redis.RedisCache",
-        "LOCATION": REDIS_URL,
-        "TIMEOUT": 300,
+if IS_VERCEL:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        }
     }
-}
+else:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.redis.RedisCache",
+            "LOCATION": REDIS_URL,
+            "TIMEOUT": 300,
+        }
+    }
 
-# ── Celery ──────────────────────────────────────
-CELERY_BROKER_URL = REDIS_URL
-CELERY_RESULT_BACKEND = "django-db"
-CELERY_CACHE_BACKEND = "default"
-CELERY_ACCEPT_CONTENT = ["json"]
-CELERY_TASK_SERIALIZER = "json"
-CELERY_RESULT_SERIALIZER = "json"
-CELERY_TIMEZONE = "Asia/Kolkata"
-CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
-CELERY_TASK_ROUTES = {
-    "apps.scraper.tasks.*": {"queue": "scraping"},
-    "apps.ai.tasks.*": {"queue": "ai_scoring"},
-    "apps.jobs.tasks.send_outreach_email": {"queue": "email_outreach"},
-    "apps.jobs.tasks.send_notification": {"queue": "notifications"},
-}
+# ── Celery (only on Railway/local) ──────────────
+if not IS_VERCEL:
+    CELERY_BROKER_URL = REDIS_URL
+    CELERY_RESULT_BACKEND = "django-db"
+    CELERY_CACHE_BACKEND = "default"
+    CELERY_ACCEPT_CONTENT = ["json"]
+    CELERY_TASK_SERIALIZER = "json"
+    CELERY_RESULT_SERIALIZER = "json"
+    CELERY_TIMEZONE = "Asia/Kolkata"
+    CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
+    CELERY_TASK_ROUTES = {
+        "apps.scraper.tasks.*": {"queue": "scraping"},
+        "apps.ai.tasks.*": {"queue": "ai_scoring"},
+        "apps.jobs.tasks.send_outreach_email": {"queue": "email_outreach"},
+        "apps.jobs.tasks.send_notification": {"queue": "notifications"},
+    }
 
 # ── Elasticsearch ───────────────────────────────
 ELASTICSEARCH_URL = os.environ.get("ELASTICSEARCH_URL", "http://localhost:9200")
@@ -140,6 +156,12 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:4000",
     "http://localhost:80",
 ]
+
+# Allow all Vercel preview URLs
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https://.*\.vercel\.app$",
+]
+
 CORS_ALLOW_CREDENTIALS = True
 
 # ── Auth ─────────────────────────────────────────
@@ -158,6 +180,7 @@ ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
 APOLLO_API_KEY = os.environ.get("APOLLO_API_KEY", "")
 HUNTER_API_KEY = os.environ.get("HUNTER_API_KEY", "")
 SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY", "")
+SCRAPER_API_KEY = os.environ.get("SCRAPER_API_KEY", "jobpilot-scraper-key-2024")
 
 # ── DRF Spectacular (OpenAPI) ───────────────────
 SPECTACULAR_SETTINGS = {
