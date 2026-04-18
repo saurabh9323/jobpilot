@@ -9,14 +9,16 @@ const nextConfig = {
     ],
   },
   async rewrites() {
+    const gatewayUrl = process.env.NEXT_PUBLIC_GATEWAY_URL || "http://localhost:4000";
+    const djangoUrl = process.env.NEXT_PUBLIC_DJANGO_URL || "http://localhost:8000";
     return [
       {
         source: "/api/gateway/:path*",
-        destination: `${process.env.NEXT_PUBLIC_GATEWAY_URL}/api/:path*`,
+        destination: `${gatewayUrl}/api/:path*`,
       },
       {
         source: "/api/django/:path*",
-        destination: `${process.env.NEXT_PUBLIC_DJANGO_URL}/api/:path*`,
+        destination: `${djangoUrl}/api/:path*`,
       },
     ];
   },
