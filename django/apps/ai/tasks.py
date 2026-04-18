@@ -2,14 +2,22 @@
 JobPilot AI — Celery tasks for AI/ML scoring pipeline
 """
 import logging
-from celery import shared_task
 from django.conf import settings
+
+try:
+    from celery import shared_task
+except ImportError:
+    def shared_task(*args, **kwargs):
+        def decorator(func):
+            return func
+        if len(args) == 1 and callable(args[0]):
+            return args[0]
+        return decorator
 
 logger = logging.getLogger(__name__)
 
 # Lazy-load heavy models so worker startup stays fast
 _embedder = None
-_clf = None
 
 
 def get_embedder():
@@ -41,7 +49,6 @@ def score_job_match(self, job_id: str):
 
     try:
         job = Job.objects.select_related("company").get(id=job_id)
-        # In production: pass user_id too. For now, use the first active profile.
         profile = UserProfile.objects.filter(is_active=True).first()
         if not profile:
             logger.warning("No active user profile — skipping scoring for %s", job_id)
@@ -54,7 +61,6 @@ def score_job_match(self, job_id: str):
         resume_embedding = embedder.encode(profile.resume_text, normalize_embeddings=True)
         semantic_score = float((job_embedding @ resume_embedding).clip(0, 1))
 
-        # Save embedding to pgvector for future nearest-neighbour queries
         job.description_embedding = job_embedding.tolist()
 
         # 2. Skills overlap
@@ -62,13 +68,13 @@ def score_job_match(self, job_id: str):
         user_skills = {s.lower() for s in profile.skills}
         skills_score = len(job_skills & user_skills) / max(len(job_skills), 1)
 
-        # 3. Salary match (1.0 if within range, partial if close)
+        # 3. Salary match
         salary_score = 1.0
         if job.salary_min and profile.salary_floor:
             if job.salary_max and job.salary_max < profile.salary_floor * 0.8:
-                salary_score = 0.2   # way below floor
+                salary_score = 0.2
             elif job.salary_min and job.salary_min > profile.salary_ceiling * 1.3:
-                salary_score = 0.5   # above target — still interesting
+                salary_score = 0.5
 
         # 4. Weighted final score
         match_score = (
@@ -86,7 +92,9 @@ def score_job_match(self, job_id: str):
 
     except Exception as exc:
         logger.error("score_job_match failed for %s: %s", job_id, exc)
-        raise self.retry(exc=exc)
+        if hasattr(self, 'retry'):
+            raise self.retry(exc=exc)
+        raise exc
 
 
 @shared_task(queue="ai_scoring", name="apps.ai.tasks.rescore_pending_applications")
@@ -111,8 +119,7 @@ def rescore_pending_applications():
 @shared_task(queue="ai_scoring", name="apps.ai.tasks.generate_cover_letter")
 def generate_cover_letter(job_id: str, user_id: int) -> str:
     """
-    Use Claude/GPT-4o to generate a tailored cover letter.
-    Returns the generated text and saves it to the Application.
+    Use Claude to generate a tailored cover letter.
     """
     from apps.jobs.models import Job, Application
     from apps.users.models import UserProfile
@@ -146,7 +153,6 @@ Do NOT include "Dear Hiring Manager" or a salutation — start with the first pa
 
     cover_letter = message.content[0].text
 
-    # Save to Application if it exists
     try:
         application = Application.objects.get(job_id=job_id, user_id=user_id)
         application.cover_letter = cover_letter
