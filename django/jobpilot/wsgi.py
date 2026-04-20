@@ -5,12 +5,18 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "jobpilot.settings")
 
 application = get_wsgi_application()
 
-# ── DB connection check on startup ──────────────
+# ── DB connection check + auto migrate ──────────
 import logging
 logger = logging.getLogger(__name__)
 try:
     from django.db import connection
     connection.ensure_connection()
     logger.info("✅ DATABASE CONNECTED — Supabase OK")
+    
+    # Run migrations automatically
+    from django.core.management import call_command
+    call_command("migrate", "--run-syncdb", verbosity=1)
+    logger.info("✅ MIGRATIONS DONE")
+    
 except Exception as e:
     logger.error("❌ DATABASE FAILED: %s", e)
