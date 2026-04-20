@@ -13,8 +13,8 @@ try:
     logger.info("✅ DATABASE CONNECTED — Supabase OK")
     
     from django.core.management import call_command
-    call_command("migrate", verbosity=1)        # runs all migrations including auth
-    call_command("migrate", "--run-syncdb", verbosity=1)  # creates unmigrated app tables
+    call_command("makemigrations", verbosity=1)   # create migration files
+    call_command("migrate", verbosity=1)           # apply all migrations
     logger.info("✅ MIGRATIONS DONE")
     
 except Exception as e:
