@@ -20,7 +20,7 @@ import dotenv from "dotenv";
 
 import { authRouter }    from "./routes/auth";
 import { scraperRouter } from "./routes/scraper";
-import { hrFinderRouter }from "./routes/hr-finder";
+// import { hrFinderRouter }from "./routes/hr-finder";
 import { notifRouter }   from "./routes/notifications";
 import { authMiddleware } from "./middleware/auth";
 
@@ -130,7 +130,7 @@ app.get("/health", (_req, res) => {
 
 app.use("/api/auth",          authRouter);
 app.use("/api/scraper",       authMiddleware, scraperRouter);
-app.use("/api/hr-finder",     authMiddleware, hrFinderRouter);
+// app.use("/api/hr-finder",     authMiddleware, hrFinderRouter);
 app.use("/api/notifications", authMiddleware, notifRouter);
 
 // 404 handler
