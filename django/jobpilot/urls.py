@@ -8,22 +8,21 @@ from drf_spectacular.views import (
     SpectacularRedocView,
 )
 
-
 urlpatterns = [
     # Admin
     path("admin/", admin.site.urls),
 
-    # OpenAPI schema
-    path("api/schema/",              SpectacularAPIView.as_view(),       name="schema"),
-    path("api/schema/swagger-ui/",   SpectacularSwaggerView.as_view(),   name="swagger-ui"),
-    path("api/schema/redoc/",        SpectacularRedocView.as_view(),     name="redoc"),
+    # Health check — Vercel uses this to verify deployment
+    path("api/health/", lambda request: __import__('django.http', fromlist=['JsonResponse']).JsonResponse({"status": "ok"})),
+
+    # OpenAPI docs
+    path("api/schema/", SpectacularAPIView.as_view(),                      name="schema"),
+    path("api/docs/",   SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
+    path("api/redoc/",  SpectacularRedocView.as_view(url_name="schema"),   name="redoc"),
 
     # App routes
     path("api/users/",   include("apps.users.urls")),
-    path("api/ai/",      include("apps.jobs.urls")),        # jobs, applications, scrape-runs
-    path("api/ai/",      include("apps.ai.urls")),          # cover-letter, ats-score, scoring
+    path("api/ai/",      include("apps.jobs.urls")),
+    path("api/ai/",      include("apps.ai.urls")),
     path("api/scraper/", include("apps.scraper.urls")),
-    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
-    path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
-    path("api/redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
